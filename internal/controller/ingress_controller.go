@@ -102,12 +102,15 @@ func (r *IngressReconciler) deleteWithRetry(ctx context.Context, slug string) {
 		logger.Error(err, "could not build Shlink client for deletion, skipping", "slug", slug)
 		return
 	}
+	var lastErr error
 	for i := 0; i < maxDeleteRetries; i++ {
 		if err := sc.DeleteShortURL(slug); err == nil {
 			return
+		} else {
+			lastErr = err
 		}
 	}
-	logger.Error(err, "failed to delete short URL after retries, removing finalizer anyway", "slug", slug)
+	logger.Error(lastErr, "failed to delete short URL after retries, removing finalizer anyway", "slug", slug)
 }
 
 // shlinkClient returns the Shlink client to use. In tests ShlinkClientOverride takes precedence.
