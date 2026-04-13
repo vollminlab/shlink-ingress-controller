@@ -1,0 +1,14 @@
+image:
+  repository: harbor.vollminlab.com/vollminlab/shlink-ingress-controller
+  tag: ""
+  pullPolicy: IfNotPresent
+
+shlink:
+  apiUrl: https://go.vollminlab.com/rest/v3
+  secretName: shlink-credentials
+  secretNamespace: shlink
+
+resources: {}
+
+nameOverride: ""
+fullnameOverride: ""
