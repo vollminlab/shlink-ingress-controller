@@ -18,5 +18,17 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run tests
+      - name: Run unit tests
         run: go test ./...
+
+      - name: Install setup-envtest
+        run: go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+        env:
+          GOTOOLCHAIN: auto
+
+      - name: Run integration tests
+        run: |
+          KUBEBUILDER_ASSETS=$(setup-envtest use 1.32 --bin-dir /tmp/envtest-bins -p path)
+          go test -tags integration -timeout 120s ./internal/controller/
+        env:
+          GOTOOLCHAIN: auto
