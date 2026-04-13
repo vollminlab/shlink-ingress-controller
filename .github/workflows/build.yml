@@ -25,21 +25,24 @@ jobs:
           tar -xf /tmp/kaniko-image.tar -C $HOME/kaniko --strip-components=1 kaniko
           chmod +x $HOME/kaniko/executor
           rm /tmp/kaniko-image.tar
+          # KANIKO_DIR must be set as an env var before the executor starts —
+          # kaniko reads it during init, before --kaniko-dir flag is parsed.
+          echo "KANIKO_DIR=$HOME/kaniko" >> $GITHUB_ENV
 
       - name: Configure Harbor credentials
         run: |
-          mkdir -p $HOME/kaniko/.docker
+          mkdir -p $KANIKO_DIR/.docker
           printf '{"auths":{"harbor.vollminlab.com":{"auth":"%s"}}}' \
             "$(printf '%s:%s' '${{ secrets.HARBOR_USERNAME }}' '${{ secrets.HARBOR_PASSWORD }}' | base64 -w0)" \
-            > $HOME/kaniko/.docker/config.json
+            > $KANIKO_DIR/.docker/config.json
 
       - name: Build and push with kaniko
         run: |
-          $HOME/kaniko/executor \
+          $KANIKO_DIR/executor \
             --context=dir://${{ github.workspace }} \
             --dockerfile=${{ github.workspace }}/Dockerfile \
             --destination=harbor.vollminlab.com/vollminlab/shlink-ingress-controller:${{ github.ref_name }} \
-            --kaniko-dir=$HOME/kaniko
+            --force
 
   publish-chart:
     runs-on: vollminlab
