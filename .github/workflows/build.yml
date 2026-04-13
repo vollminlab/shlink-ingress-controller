@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: vollminlab
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +29,7 @@ jobs:
           tags: harbor.vollminlab.com/vollminlab/shlink-ingress-controller:${{ github.ref_name }}
 
   publish-chart:
-    runs-on: self-hosted
+    runs-on: vollminlab
     needs: build
     steps:
       - uses: actions/checkout@v4
