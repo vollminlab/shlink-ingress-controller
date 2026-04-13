@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shlink-ingress-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shlink-ingress-controller.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "shlink-ingress-controller.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "shlink-ingress-controller.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "shlink-ingress-controller.serviceAccountName" . }}
+      containers:
+        - name: controller
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --shlink-api-url={{ .Values.shlink.apiUrl }}
+            - --shlink-secret-name={{ .Values.shlink.secretName }}
+            - --shlink-secret-namespace={{ .Values.shlink.secretNamespace }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
