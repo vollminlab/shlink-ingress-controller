@@ -18,23 +18,25 @@ jobs:
           curl -fsSL https://github.com/google/go-containerregistry/releases/download/v0.20.2/go-containerregistry_Linux_x86_64.tar.gz \
             | tar -xz -C /tmp crane
           /tmp/crane export gcr.io/kaniko-project/executor:v1.23.2 /tmp/kaniko-image.tar
-          tar -xf /tmp/kaniko-image.tar -C / kaniko
-          chmod +x /kaniko/executor
+          mkdir -p $HOME/kaniko
+          tar -xf /tmp/kaniko-image.tar -C $HOME/kaniko --strip-components=1 kaniko
+          chmod +x $HOME/kaniko/executor
           rm /tmp/kaniko-image.tar
 
       - name: Configure Harbor credentials
         run: |
-          mkdir -p /kaniko/.docker
+          mkdir -p $HOME/.docker
           printf '{"auths":{"harbor.vollminlab.com":{"auth":"%s"}}}' \
             "$(printf '%s:%s' '${{ secrets.HARBOR_USERNAME }}' '${{ secrets.HARBOR_PASSWORD }}' | base64 -w0)" \
-            > /kaniko/.docker/config.json
+            > $HOME/.docker/config.json
 
       - name: Build and push with kaniko
         run: |
-          /kaniko/executor \
+          $HOME/kaniko/executor \
             --context=dir://${{ github.workspace }} \
             --dockerfile=${{ github.workspace }}/Dockerfile \
-            --destination=harbor.vollminlab.com/vollminlab/shlink-ingress-controller:${{ github.ref_name }}
+            --destination=harbor.vollminlab.com/vollminlab/shlink-ingress-controller:${{ github.ref_name }} \
+            --ssl-cert-dir=$HOME/kaniko/ssl/certs
 
   publish-chart:
     runs-on: vollminlab
