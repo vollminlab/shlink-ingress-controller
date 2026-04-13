@@ -14,35 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up kaniko
-        run: |
-          # crane is a standalone OCI tool — no Docker daemon required.
-          # We use it to export the kaniko executor image and extract the binary.
-          curl -fsSL https://github.com/google/go-containerregistry/releases/download/v0.20.2/go-containerregistry_Linux_x86_64.tar.gz \
-            | tar -xz -C /tmp crane
-          /tmp/crane export gcr.io/kaniko-project/executor:v1.23.2 /tmp/kaniko-image.tar
-          mkdir -p $HOME/kaniko
-          tar -xf /tmp/kaniko-image.tar -C $HOME/kaniko --strip-components=1 kaniko
-          chmod +x $HOME/kaniko/executor
-          rm /tmp/kaniko-image.tar
-          # KANIKO_DIR must be set as an env var before the executor starts —
-          # kaniko reads it during init, before --kaniko-dir flag is parsed.
-          echo "KANIKO_DIR=$HOME/kaniko" >> $GITHUB_ENV
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: harbor.vollminlab.com
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
 
-      - name: Configure Harbor credentials
-        run: |
-          mkdir -p $KANIKO_DIR/.docker
-          printf '{"auths":{"harbor.vollminlab.com":{"auth":"%s"}}}' \
-            "$(printf '%s:%s' '${{ secrets.HARBOR_USERNAME }}' '${{ secrets.HARBOR_PASSWORD }}' | base64 -w0)" \
-            > $KANIKO_DIR/.docker/config.json
-
-      - name: Build and push with kaniko
-        run: |
-          $KANIKO_DIR/executor \
-            --context=dir://${{ github.workspace }} \
-            --dockerfile=${{ github.workspace }}/Dockerfile \
-            --destination=harbor.vollminlab.com/vollminlab/shlink-ingress-controller:${{ github.ref_name }} \
-            --force
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: harbor.vollminlab.com/vollminlab/shlink-ingress-controller:${{ github.ref_name }}
 
   publish-chart:
     runs-on: vollminlab
