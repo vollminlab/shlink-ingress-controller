@@ -5,24 +5,21 @@ on:
     tags:
       - 'v*'
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: vollminlab
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Log in to Harbor
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: harbor.vollminlab.com
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -32,16 +29,19 @@ jobs:
     runs-on: vollminlab
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Log in to Harbor OCI registry
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          helm registry login harbor.vollminlab.com \
-            --username ${{ secrets.HARBOR_USERNAME }} \
-            --password ${{ secrets.HARBOR_PASSWORD }}
+          echo "$HARBOR_PASSWORD" | helm registry login harbor.vollminlab.com \
+            --username "$HARBOR_USERNAME" \
+            --password-stdin
 
       - name: Package and push chart
         run: |
