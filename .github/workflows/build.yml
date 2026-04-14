@@ -58,4 +58,4 @@ jobs:
             --version "${SEMVER}" \
             --app-version "${SEMVER}"
           helm push "shlink-ingress-controller-${SEMVER}.tgz" \
-            oci://harbor.vollminlab.com/vollminlab
+            oci://harbor.vollminlab.com/vollminlab/charts
