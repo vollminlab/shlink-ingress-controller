@@ -31,6 +31,8 @@ spec:
 
 This creates `https://go.vollminlab.com/my-app` → `https://my-app.vollminlab.com`.
 
+The actual short links — e.g. `https://vollm.in/my-app` — also resolve to the same destination. Shlink is configured with `vollm.in` as an additional domain, so both `go.vollminlab.com/<slug>` and `vollm.in/<slug>` work. The controller only needs to call the API once; Shlink handles both domains automatically.
+
 ## Prerequisites
 
 ### Shlink API key Secret
