@@ -52,7 +52,7 @@ Create the API key in the Shlink admin UI or via the Shlink CLI before deploying
 
 ## Deploying via Helm
 
-The Helm chart is published to Harbor as an OCI artifact.
+The Helm chart is published to Harbor as an OCI artifact. Harbor is an internal container registry running in the Kubernetes cluster at `harbor.vollminlab.com` — see `k8s-vollminlab-cluster` for its deployment.
 
 ### Add the registry
 
