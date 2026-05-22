@@ -3,6 +3,8 @@ image:
   tag: ""
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 shlink:
   apiUrl: https://go.vollminlab.com/rest/v3
   secretName: shlink-credentials
